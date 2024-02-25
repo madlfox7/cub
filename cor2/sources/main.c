@@ -5,20 +5,13 @@
 
 int main(int argc, char **argv) 
 {
-    struct game Game;
+     struct game Game;
    ft_check_argc_and_name(argc, argv);
     ft_get_map(argv[1], &Game); 
-    printf("\n[%s]\n", Game.map[4]);
-   // exit(1);
     ft_check_map(&Game); 
   printf("MAP IS VALID\n");
-  //ft_print_map(&Game);
-
   free_map(&Game);
-  printf("F [%s]\n", Game.attr.f);
-printf("C [%s]\n", Game.attr.c);
   free_attributes(&Game);
-
   return 0;
 }
 
@@ -52,34 +45,42 @@ void ft_get_map(char *argv, struct game *Game)
 
     while ((line = get_next_line(fd)))
     {
-        if (is_valid_attr(Game, line))
+        if (is_attribute(Game, line)) //if line starts from attribute 
         {
-            map_start++;
             printf("\n[%d]\n", check_attr_count(Game));
-            if (check_attr_count(Game))
-            {
-                free(line);
-                break;
-            }
-            free(line);
-            continue;
+                free(line);  
+           map_start++;
         }
-        free(line);
+        else
+            break;
     }
+
+if (check_attr_count(Game) == 0) //boloric gone 1 hat chka
+{
+    ft_put_error("Error: Missing attribute");
+    exit(EXIT_FAILURE);
+}
+
+
+
+
 
     printf("MAP STARTS FROM [%d] line\n", map_start); 
     check_attr_path(Game);
+    
 
+  printf("PRINTING attr\n");
     printf("NO [%s]\n", Game->attr.no);
     printf("SO [%s]\n", Game->attr.so);
     printf("WE [%s]\n", Game->attr.we);
     printf("EA [%s]\n", Game->attr.ea);
     printf("F [%s]\n", Game->attr.f);
     printf("C [%s]\n", Game->attr.c);
-
+    Game->height++;
     int max_width = 0;
     int line_len = 0;
 
+  //  printf("\nMAP STARTS FROM [%s]\n", get_next_line(fd));
     while ((line = get_next_line(fd)) != NULL)
     {
         Game->height++;  
@@ -106,7 +107,7 @@ void ft_get_map(char *argv, struct game *Game)
     fd = open(argv, O_RDONLY);
     check_file_exists(argv, &fd);
 
-    while ((line = get_next_line(fd)) && map_start > 1)
+    while ((line = get_next_line(fd)) && map_start > 1) 
     {
         free(line); // Skipping attribute lines
         map_start--;
@@ -114,24 +115,31 @@ void ft_get_map(char *argv, struct game *Game)
     printf("MAP BEGINS HERE\n");
 
     int line_count = 0;
-    while ((line = get_next_line(fd)))
+     
+    while ((line = get_next_line(fd))) 
     {
         if (inv_sym(line))
         {
             ft_put_error("Error: Invalid symbol found");
             exit(EXIT_FAILURE);
         }
+
+        //forming map with calloc(replace to ft_calloc)
         Game->map[line_count] = calloc(Game->width + 1, sizeof(char)); // +1  null
-        if (Game->map[line_count] == NULL)
+        if (Game->map[line_count] == NULL) //calloc error
         {
             ft_put_error("Error: Memory allocation failed");
             exit(EXIT_FAILURE);
         }
-        strncpy(Game->map[line_count], line, strlen(line));
+
+
+        strncpy(Game->map[line_count], line, strlen(line)); 
+
         free(line);
         line_count++;
     }
-
+    ft_print_map(Game);
+   // printf("MAP END\n");
     close(fd);
 }
 
